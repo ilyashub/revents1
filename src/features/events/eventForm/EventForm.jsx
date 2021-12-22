@@ -1,37 +1,41 @@
-import React, { useState } from 'react';
-import { Segment, Header, Form, Button } from 'semantic-ui-react';
-import cuid from 'cuid';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Segment, Header, Form, Button } from "semantic-ui-react";
+import cuid from "cuid";
+import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { createEvent, updateEvent } from "../eventActions";
 
-export default function EventForm({
-  setFormOpen,
-  setEvents,
-  createEvent,
-  selectedEvent,
-  updateEvent,
-}) {
+export default function EventForm({ match, history }) {
+  const dispatch = useDispatch();
+  const selectedEvent = useSelector((state) =>
+    state.event.events.find((e) => e.id === match.params.id)
+  );
+
   const initialValues = selectedEvent ?? {
-    title: '',
-    category: '',
-    description: '',
-    city: '',
-    venue: '',
-    date: '',
+    title: "",
+    category: "",
+    description: "",
+    city: "",
+    venue: "",
+    date: "",
   };
 
   const [values, setValues] = useState(initialValues);
 
   function handleFormSubmit() {
     selectedEvent
-      ? updateEvent({ ...selectedEvent, ...values })
-      : createEvent({
-          ...values,
-          id: cuid(),
-          hostedBy: 'Bob',
-          attendees: [],
-          hostPhotoURL: '/assets/user.png',
-        });
-    setFormOpen(false);
+      ? dispatch(updateEvent({ ...selectedEvent, ...values }))
+      : dispatch(
+          createEvent({
+            ...values,
+            id: cuid(),
+            hostedBy: "Bob",
+            attendees: [],
+            hostPhotoURL: "/assets/user.png",
+          })
+        );
+
+    history.push("/events");
   }
 
   function handleInputChange(e) {
@@ -41,7 +45,7 @@ export default function EventForm({
 
   return (
     <Segment clearing>
-      <Header content={selectedEvent ? 'Edit the event' : 'Create new event'} />
+      <Header content={selectedEvent ? "Edit the event" : "Create new event"} />
       <Form onSubmit={handleFormSubmit}>
         <Form.Field>
           <input
@@ -99,7 +103,8 @@ export default function EventForm({
         </Form.Field>
         <Button type='submit' floated='right' positive content='Submit' />
         <Button
-          as={Link} to='/events'
+          as={Link}
+          to='/events'
           type='submit'
           floated='right'
           content='Cancel'
